@@ -24,12 +24,14 @@ public extension Request {
     public enum Scheme {
         case http
         case https
+        case websocket
         case none
         
         var value: String? {
             switch self {
             case .http: return "http"
             case .https: return "https"
+            case .websocket: return "ws"
             case .none: return nil
             }
         }
