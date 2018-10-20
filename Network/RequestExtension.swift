@@ -14,7 +14,7 @@ public extension NetworkRequest.Request {
         public var rawValue: String
         public init(rawValue: String) {
             if rawValue.first != "/" {
-                print("You should start your endpoints with `/`")
+                print("Endpoints must start with `/`")
             }
             self.rawValue = rawValue
         }
