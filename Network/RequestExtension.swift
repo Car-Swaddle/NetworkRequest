@@ -39,6 +39,30 @@ public extension NetworkRequest.Request {
     ///   - body: POST body
     ///   - completion: closure called when request returns
     /// - Returns: Task used to make network request
+    public func put(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
+        return self.put(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
+    }
+    
+    /// Make more convenient for dictionary instead of Data for `body`
+    ///
+    /// - Parameters:
+    ///   - endpoint: Endpoint to hit
+    ///   - queryItems: queryItems used to specify resource
+    ///   - body: POST body
+    ///   - completion: closure called when request returns
+    /// - Returns: Task used to make network request
+    public func patch(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
+        return self.patch(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
+    }
+    
+    /// Make more convenient for dictionary instead of Data for `body`
+    ///
+    /// - Parameters:
+    ///   - endpoint: Endpoint to hit
+    ///   - queryItems: queryItems used to specify resource
+    ///   - body: POST body
+    ///   - completion: closure called when request returns
+    /// - Returns: Task used to make network request
     public func post(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
         return self.post(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
     }
