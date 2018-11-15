@@ -39,7 +39,7 @@ public extension NetworkRequest.Request {
     ///   - body: POST body
     ///   - completion: closure called when request returns
     /// - Returns: Task used to make network request
-    public func put(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
+    public func put(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
         return self.put(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
     }
     
@@ -51,11 +51,11 @@ public extension NetworkRequest.Request {
     ///   - body: POST body
     ///   - completion: closure called when request returns
     /// - Returns: Task used to make network request
-    public func patch(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
+    public func patch(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
         return self.patch(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
     }
     
-    public func delete(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
+    public func delete(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
         return self.delete(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
     }
     
