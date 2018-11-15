@@ -16,6 +16,7 @@ extension Request {
         case post = "POST"
         case put = "PUT"
         case patch = "PATCH"
+        case delete = "DELETE"
     }
     
 }
@@ -153,6 +154,16 @@ final public class Request {
         guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
         request.httpMethod = Method.post.rawValue
+        request.setValue(contentType.rawValue, forHTTPHeaderField: ContentType.headerKey)
+        request.httpBody = body
+        
+        return request
+    }
+    
+    public func delete(withPath path: String, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data, contentType: ContentType = .applicationJSON) -> URLRequest? {
+        guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
+        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
+        request.httpMethod = Method.delete.rawValue
         request.setValue(contentType.rawValue, forHTTPHeaderField: ContentType.headerKey)
         request.httpBody = body
         
