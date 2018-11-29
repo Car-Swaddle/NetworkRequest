@@ -83,12 +83,16 @@ final public class Request {
         self.domain = domain
     }
     
-    public func dataTask(with request: URLRequest, completion: @escaping (_ data: Data?, _ response: URLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
-        return urlSession.dataTask(with: request, completionHandler: completion)
+    public func dataTask(with request: URLRequest, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
+        return urlSession.dataTask(with: request) { data, urlResponse, error in
+            completion(data, urlResponse as? HTTPURLResponse, error)
+        }
     }
     
     public func downloadTask(with request: URLRequest, completion: @escaping (_ data: URL?, _ response: URLResponse?, _ error: Error?) -> Void) -> URLSessionDownloadTask? {
-        return urlSession.downloadTask(with: request, completionHandler: completion)
+        return urlSession.downloadTask(with: request) { data, urlResponse, error in
+            completion(data, urlResponse as? HTTPURLResponse, error)
+        }
     }
     
     /// Create a url session data task to make a network call.
@@ -182,9 +186,7 @@ final public class Request {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
         request.httpMethod = Method.get.rawValue
         
-        return request
-        
-//        return urlSession.downloadTask(with: request, completionHandler: completion)
+        return request        
     }
     
     private func url(with path: String, queryItems: [URLQueryItem], scheme: Scheme? = nil) -> URL? {
