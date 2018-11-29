@@ -89,7 +89,7 @@ final public class Request {
         }
     }
     
-    public func downloadTask(with request: URLRequest, completion: @escaping (_ data: URL?, _ response: URLResponse?, _ error: Error?) -> Void) -> URLSessionDownloadTask? {
+    public func downloadTask(with request: URLRequest, completion: @escaping (_ data: URL?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDownloadTask? {
         return urlSession.downloadTask(with: request) { data, urlResponse, error in
             completion(data, urlResponse as? HTTPURLResponse, error)
         }
