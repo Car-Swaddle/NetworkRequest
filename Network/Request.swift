@@ -265,7 +265,7 @@ final public class MultipartFormBuilder {
         request.setValue("gzip, deflate", forHTTPHeaderField: "accept-encoding")
         request.setValue("*/*", forHTTPHeaderField: "Accept")
         
-//        request.httpBody = data
+        request.httpBody = data
         request.httpShouldHandleCookies = false
     }
     
@@ -296,7 +296,7 @@ final public class MultipartFormBuilder {
         guard let contentTypeData = contentTypeString.data(using: .utf8) else { throw endBoundaryError }
         fullData.append(contentTypeData)
         
-        fullData.append(fileData)
+//        fullData.append(fileData)
         
         let endLineMarkerData = try self.endLineMarkerData()
         fullData.append(endLineMarkerData)
