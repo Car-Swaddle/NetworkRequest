@@ -265,7 +265,7 @@ final public class MultipartFormBuilder {
         request.setValue("gzip, deflate", forHTTPHeaderField: "accept-encoding")
         request.setValue("*/*", forHTTPHeaderField: "Accept")
         
-        request.httpBody = data
+//        request.httpBody = data
         request.httpShouldHandleCookies = false
     }
     
