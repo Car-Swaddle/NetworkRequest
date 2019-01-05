@@ -110,7 +110,7 @@ final public class Request {
     
     private var multipartFormBuilder = MultipartFormBuilder(boundary: "XXX", parameterName: "file")
     
-    public func uploadMultipartFormDataTask(with mutableRequest: NSMutableURLRequest, url: URL, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
+    public func uploadMultipartFormDataTask(with mutableRequest: NSMutableURLRequest, fileURL: URL, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
         do {
             try multipartFormBuilder.configure(request: mutableRequest, withFileURL: url)
         } catch { return nil }
