@@ -295,13 +295,6 @@ final public class MultipartFormBuilder {
         return fullData as Data
     }
     
-//    private func endLineMarkerData() throws -> Data {
-//        guard let data = endLine.data(using: .utf8) else {
-//            throw MultipartFormBuilderError.unableToCreateData
-//        }
-//        return data
-//    }
-    
     private var startLine: String {
         return marker + boundary + endLine
     }
