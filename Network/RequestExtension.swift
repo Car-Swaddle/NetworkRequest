@@ -84,3 +84,12 @@ public extension NetworkRequest.Request {
     
 }
 
+
+public extension Path {
+    
+    public convenience init(endpoint: Request.Endpoint, pathArguments: [String: String]) throws {
+        try self.init(originalPath: endpoint.rawValue, pathArguments: pathArguments)
+    }
+    
+}
+

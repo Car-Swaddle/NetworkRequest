@@ -113,9 +113,7 @@ final public class Request {
     public func uploadMultipartFormDataTask(with mutableRequest: NSMutableURLRequest, url: URL, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
         do {
             try multipartFormBuilder.configure(request: mutableRequest, withFileURL: url)
-        } catch {
-            return nil
-        }
+        } catch { return nil }
         
         return urlSession.dataTask(with: mutableRequest as URLRequest) { data, urlResponse, error in
             completion(data, urlResponse as? HTTPURLResponse, error)
@@ -187,6 +185,14 @@ final public class Request {
         request.httpMethod = Method.post.rawValue
         request.setValue(contentType.rawValue, forHTTPHeaderField: ContentType.headerKey)
         request.httpBody = body
+        
+        return request
+    }
+    
+    public func multipartFormDataPost(withPath path: String, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil) -> NSMutableURLRequest? {
+        guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
+        let request = NSMutableURLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
+        request.httpMethod = Method.post.rawValue
         
         return request
     }
