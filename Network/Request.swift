@@ -268,12 +268,14 @@ final public class MultipartFormBuilder {
     public let boundary: String
     public let parameterName: String
     
+    private var endBoundaryError: Error {
+        return MultipartFormBuilderError.unableToCreateData
+    }
+    
     public func data(fromURL url: URL, contentType: String) throws -> Data {
         
         let fileData = try Data(contentsOf: url)
-        
         let fileName = url.lastPathComponent
-        
         let fullData = NSMutableData()
         
         let lineOne = marker + boundary + endLine
@@ -282,48 +284,21 @@ final public class MultipartFormBuilder {
         }
         fullData.append(lineOneData)
         
-        // 2
-//        let lineTwo = "Content-Disposition: form-data; name=\"image\"; filename=\"" + fileName + "\"\r\n"
         let contentDisposition = self.contentDisposition(fileName: fileName)
-        guard let contentDispositionData = contentDisposition.data(using: .utf8) else {
-            throw MultipartFormBuilderError.unableToCreateData
-        }
-//        NSLog(lineTwo)
+        guard let contentDispositionData = contentDisposition.data(using: .utf8) else { throw endBoundaryError }
+
         fullData.append(contentDispositionData)
-        
-        // 3
-//        let lineThree = "Content-Type: image/jpg\r\n\r\n"
+
         let contentTypeString = self.contentType(contentType: contentType)
-        guard let contentTypeData = contentTypeString.data(using: .utf8) else {
-            throw MultipartFormBuilderError.unableToCreateData
-        }
+        guard let contentTypeData = contentTypeString.data(using: .utf8) else { throw endBoundaryError }
         fullData.append(contentTypeData)
-//        fullData.appendData(lineThree.dataUsingEncoding(
-//            NSUTF8StringEncoding,
-//            allowLossyConversion: false)!)
         
-        // 4
-        fullData.append(fileData)
+//        fullData.append(fileData)
         
         let endLineMarkerData = try self.endLineMarkerData()
         fullData.append(endLineMarkerData)
         
-        
-        
-        // 5
-//        let lineFive = "\r\n"
-//        fullData.appendData(lineFive.dataUsingEncoding(
-//            NSUTF8StringEncoding,
-//            allowLossyConversion: false)!)
-        
-        // 6 - The end. Notice -- at the start and at the end
-//        let lineSix = "--" + boundary + "--\r\n"
-//        fullData.appendData(lineSix.dataUsingEncoding(
-//            NSUTF8StringEncoding,
-//            allowLossyConversion: false)!)
-        guard let endBoundaryData = endBoundary().data(using: .utf8) else {
-            throw MultipartFormBuilderError.unableToCreateData
-        }
+        guard let endBoundaryData = endBoundary().data(using: .utf8) else { throw endBoundaryError }
         fullData.append(endBoundaryData)
         
         return fullData as Data
