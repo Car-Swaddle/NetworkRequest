@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import UIKit
 
 extension Request {
     
@@ -274,7 +275,11 @@ final public class MultipartFormBuilder {
     
     public func data(fromURL url: URL, contentType: String) throws -> Data {
         
-        let fileData = try Data(contentsOf: url)
+//        let fileData = try Data(contentsOf: url)
+        
+        let img = UIImage(contentsOfFile: url.path)
+        let data: Data = UIImageJPEGRepresentation(img, 1)
+        
         let fileName = url.lastPathComponent
         let fullData = NSMutableData()
         
@@ -293,7 +298,9 @@ final public class MultipartFormBuilder {
         guard let contentTypeData = contentTypeString.data(using: .utf8) else { throw endBoundaryError }
         fullData.append(contentTypeData)
         
-//        fullData.append(fileData)
+        
+        
+        fullData.append(fileData)
         
         let endLineMarkerData = try self.endLineMarkerData()
         fullData.append(endLineMarkerData)
