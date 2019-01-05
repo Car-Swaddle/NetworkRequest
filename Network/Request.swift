@@ -111,9 +111,9 @@ final public class Request {
     private var multipartFormBuilder = MultipartFormBuilder(boundary: "XXX")
     
     public func uploadMultipartFormDataTask(with mutableRequest: NSMutableURLRequest, fileURL: URL, contentType: String, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
-//        do {
-//            try multipartFormBuilder.configure(request: mutableRequest, withFileURL: fileURL, contentType: contentType)
-//        } catch { return nil }
+        do {
+            try multipartFormBuilder.configure(request: mutableRequest, withFileURL: fileURL, contentType: contentType)
+        } catch { return nil }
         
         return urlSession.dataTask(with: mutableRequest as URLRequest) { data, urlResponse, error in
             completion(data, urlResponse as? HTTPURLResponse, error)
@@ -277,9 +277,6 @@ final public class MultipartFormBuilder {
     }
     
     public func data(fromURL url: URL, contentType: String) throws -> Data {
-        
-//        let fileData = try Data(contentsOf: url)
-        
         guard let img = UIImage(contentsOfFile: url.path),
             let fileData = img.jpegData(compressionQuality: 1) else { throw MultipartFormBuilderError.invalidFilePath }
         
@@ -287,9 +284,7 @@ final public class MultipartFormBuilder {
         let fullData = NSMutableData()
         
         let lineOne = marker + boundary + endLine
-        guard let lineOneData = lineOne.data(using: .utf8) else {
-            throw MultipartFormBuilderError.unableToCreateData
-        }
+        guard let lineOneData = lineOne.data(using: .utf8) else { throw endBoundaryError }
         fullData.append(lineOneData)
         
         let contentDisposition = self.contentDisposition(fileName: fileName)
@@ -300,8 +295,6 @@ final public class MultipartFormBuilder {
         let contentTypeString = self.contentType(contentType: contentType)
         guard let contentTypeData = contentTypeString.data(using: .utf8) else { throw endBoundaryError }
         fullData.append(contentTypeData)
-        
-        
         
         fullData.append(fileData)
         
