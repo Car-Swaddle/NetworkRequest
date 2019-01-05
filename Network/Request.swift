@@ -241,6 +241,7 @@ final public class MultipartFormBuilder {
     
     enum MultipartFormBuilderError: Error {
         case unableToCreateData
+        case invalidFilePath
     }
     
     public static let defaultBoundary = "MultipartFormBuilderBoundary"
@@ -277,8 +278,8 @@ final public class MultipartFormBuilder {
         
 //        let fileData = try Data(contentsOf: url)
         
-        let img = UIImage(contentsOfFile: url.path)
-        let data: Data = UIImageJPEGRepresentation(img, 1)
+        guard let img = UIImage(contentsOfFile: url.path),
+            let fileData = img.jpegData(compressionQuality: 1) else { throw MultipartFormBuilderError.invalidFilePath }
         
         let fileName = url.lastPathComponent
         let fullData = NSMutableData()
