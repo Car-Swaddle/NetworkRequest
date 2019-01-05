@@ -7,11 +7,17 @@
 //
 
 import XCTest
-@testable import Network
+@testable import NetworkRequest
 
 class NetworkTests: XCTestCase {
 
     func testPerformanceExample() {
+        do {
+            let path = try Path(originalPath: "/api/profile-picture/{image}", pathArguments: ["image": "name"])
+            XCTAssert(path.path != "", "Should have non empty path")
+        } catch {
+            XCTAssert(false, "Error with path ")
+        }
         
     }
     
