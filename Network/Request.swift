@@ -46,8 +46,8 @@ public extension Request {
 
 public extension Request {
     
-    struct ContentType {
-        var rawValue: String
+    public struct ContentType {
+        public var rawValue: String
         
         public static let headerKey = "Content-Type"
         
@@ -60,7 +60,7 @@ public extension Request {
         public static let textHTML = ContentType(rawValue: "text/html;charset=utf-8")
         public static let any = ContentType(rawValue: "*/*")
         
-        static func multipartFormContentType(boundary: String) -> ContentType {
+        public static func multipartFormContentType(boundary: String) -> ContentType {
             return ContentType(rawValue: "multipart/form-data; boundary=" + boundary)
         }
         
@@ -345,7 +345,7 @@ final public class MultipartFormBuilder {
     }
     
     private func endBoundary() -> String {
-        return "\(marker)\(boundary)\(marker)\(endBoundary)"
+        return "\(marker)\(boundary)\(marker)"
     }
     
 }
