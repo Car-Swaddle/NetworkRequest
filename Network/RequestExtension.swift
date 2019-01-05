@@ -71,6 +71,10 @@ public extension NetworkRequest.Request {
         return self.post(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
     }
     
+    public func multipartFormDataPost(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil) -> NSMutableURLRequest? {
+        return self.multipartFormDataPost(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme)
+    }
+    
     /// Download a file from another server via network
     ///
     /// - Parameters:
