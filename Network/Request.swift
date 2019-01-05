@@ -266,7 +266,7 @@ final public class MultipartFormBuilder {
         request.setValue("*/*", forHTTPHeaderField: "Accept")
         
         request.httpBody = data
-        request.httpShouldHandleCookies = false
+//        request.httpShouldHandleCookies = false
     }
     
     public let boundary: String
