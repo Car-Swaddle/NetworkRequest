@@ -262,7 +262,7 @@ final public class MultipartFormBuilder {
         request.setValue(String(data.count), forHTTPHeaderField: Request.contentLengthHeaderKey)
         
         request.httpBody = data
-        request.httpShouldHandleCookies = false
+//        request.httpShouldHandleCookies = false
     }
     
     public let boundary: String
@@ -293,7 +293,7 @@ final public class MultipartFormBuilder {
         guard let contentTypeData = contentTypeString.data(using: .utf8) else { throw endBoundaryError }
         fullData.append(contentTypeData)
         
-//        fullData.append(fileData)
+        fullData.append(fileData)
         
         let endLineMarkerData = try self.endLineMarkerData()
         fullData.append(endLineMarkerData)
