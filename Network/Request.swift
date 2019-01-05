@@ -112,7 +112,7 @@ final public class Request {
     
     public func uploadMultipartFormDataTask(with mutableRequest: NSMutableURLRequest, fileURL: URL, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
         do {
-            try multipartFormBuilder.configure(request: mutableRequest, withFileURL: url)
+            try multipartFormBuilder.configure(request: mutableRequest, withFileURL: fileURL)
         } catch { return nil }
         
         return urlSession.dataTask(with: mutableRequest as URLRequest) { data, urlResponse, error in
