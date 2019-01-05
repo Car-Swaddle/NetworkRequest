@@ -260,7 +260,7 @@ final public class MultipartFormBuilder {
         
         let contentType = Request.ContentType.multipartFormContentType(boundary: boundary)
         
-//        request.setValue(contentType.rawValue, forHTTPHeaderField: Request.ContentType.headerKey)
+        request.setValue(contentType.rawValue, forHTTPHeaderField: Request.ContentType.headerKey)
         request.setValue(String(data.count), forHTTPHeaderField: Request.contentLengthHeaderKey)
         request.setValue("gzip, deflate", forHTTPHeaderField: "accept-encoding")
         request.setValue("*/*", forHTTPHeaderField: "Accept")
