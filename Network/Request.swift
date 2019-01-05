@@ -277,53 +277,60 @@ final public class MultipartFormBuilder {
     }
     
     public func data(fromURL url: URL, contentType: String) throws -> Data {
-        guard let img = UIImage(contentsOfFile: url.path),
-            let fileData = img.jpegData(compressionQuality: 1) else { throw MultipartFormBuilderError.invalidFilePath }
+//        guard let img = UIImage(contentsOfFile: url.path),
+//            let fileData = img.jpegData(compressionQuality: 1) else { throw MultipartFormBuilderError.invalidFilePath }
+        
+        let fileData = try Data(contentsOf: url)
         
         let fileName = url.lastPathComponent
         let fullData = NSMutableData()
         
-        let lineOne = marker + boundary + endLine
-        guard let lineOneData = lineOne.data(using: .utf8) else { throw endBoundaryError }
-        fullData.append(lineOneData)
-        
-        let contentDisposition = self.contentDisposition(fileName: fileName)
-        guard let contentDispositionData = contentDisposition.data(using: .utf8) else { throw endBoundaryError }
-
-        fullData.append(contentDispositionData)
-
-        let contentTypeString = self.contentType(contentType: contentType)
-        guard let contentTypeData = contentTypeString.data(using: .utf8) else { throw endBoundaryError }
-        fullData.append(contentTypeData)
-        
-//        fullData.append(fileData)
-        
-        let endLineMarkerData = try self.endLineMarkerData()
-        fullData.append(endLineMarkerData)
-        
-        guard let endBoundaryData = endBoundary().data(using: .utf8) else { throw endBoundaryError }
-        fullData.append(endBoundaryData)
+        try fullData.appendEncodedString(startLine)
+        try fullData.appendEncodedString(contentDisposition(fileName: fileName))
+        try fullData.appendEncodedString(contentTypeLine(contentType: contentType))
+        fullData.append(fileData)
+        try fullData.appendEncodedString(endLine)
+        try fullData.appendEncodedString(endBoundary)
         
         return fullData as Data
     }
     
-    private func endLineMarkerData() throws -> Data {
-        guard let data = endLine.data(using: .utf8) else {
-            throw MultipartFormBuilderError.unableToCreateData
-        }
-        return data
+//    private func endLineMarkerData() throws -> Data {
+//        guard let data = endLine.data(using: .utf8) else {
+//            throw MultipartFormBuilderError.unableToCreateData
+//        }
+//        return data
+//    }
+    
+    private var startLine: String {
+        return marker + boundary + endLine
     }
     
     private func contentDisposition(fileName: String) -> String {
         return "Content-Disposition: form-data; name=\"\(parameterName)\"; filename=\"\(fileName)\"\(endLine)"
     }
     
-    private func contentType(contentType: String) -> String {
+    private func contentTypeLine(contentType: String) -> String {
         return "Content-Type: \(contentType)\(endLine)"
     }
     
-    private func endBoundary() -> String {
-        return "\(marker)\(boundary)\(marker)"
+    private var endBoundary: String {
+        return marker + boundary + marker + endLine
+    }
+    
+}
+
+
+
+public extension NSMutableData {
+    
+    public struct EncodingError: Error {
+        static let error = EncodingError()
+    }
+    
+    public func appendEncodedString(_ string: String) throws {
+        guard let data = string.data(using: .utf8, allowLossyConversion: true) else { throw EncodingError.error }
+        append(data)
     }
     
 }
