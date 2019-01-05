@@ -62,7 +62,7 @@ public extension Request {
         public static let any = ContentType(rawValue: "*/*")
         
         public static func multipartFormContentType(boundary: String) -> ContentType {
-            return ContentType(rawValue: "multipart/form-data; boundary=" + boundary)
+            return ContentType(rawValue: "multipart/form-data; boundary=\(boundary)")
         }
         
     }
@@ -311,7 +311,7 @@ final public class MultipartFormBuilder {
     }
     
     private func contentTypeLine(contentType: String) -> String {
-        return "Content-Type: \(contentType)\(endLine)"
+        return "Content-Type: \(contentType)\(endLine)\(endLine)"
     }
     
     private var endBoundary: String {
