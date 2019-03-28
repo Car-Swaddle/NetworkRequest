@@ -11,6 +11,7 @@
 		99132574214B8A8C00384890 /* NetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99132573214B8A8C00384890 /* NetworkTests.swift */; };
 		99132576214B8A8C00384890 /* Network.h in Headers */ = {isa = PBXBuildFile; fileRef = 99132568214B8A8C00384890 /* Network.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		992C53B22150C51B0076949C /* RequestExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 992C53B12150C51B0076949C /* RequestExtension.swift */; };
+		99D5DA0721F6D63600E6A511 /* image.png in Resources */ = {isa = PBXBuildFile; fileRef = 99D5DA0621F6D63600E6A511 /* image.png */; };
 		99F78F15214B8AF500D1BD28 /* Request.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F78F14214B8AF500D1BD28 /* Request.swift */; };
 		99F78F17214B8AFF00D1BD28 /* Path.swift in Sources */ = {isa = PBXBuildFile; fileRef = 99F78F16214B8AFF00D1BD28 /* Path.swift */; };
 /* End PBXBuildFile section */
@@ -33,6 +34,7 @@
 		99132573214B8A8C00384890 /* NetworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkTests.swift; sourceTree = "<group>"; };
 		99132575214B8A8C00384890 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		992C53B12150C51B0076949C /* RequestExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestExtension.swift; sourceTree = "<group>"; };
+		99D5DA0621F6D63600E6A511 /* image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image.png; sourceTree = "<group>"; };
 		99F78F14214B8AF500D1BD28 /* Request.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Request.swift; sourceTree = "<group>"; };
 		99F78F16214B8AFF00D1BD28 /* Path.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Path.swift; sourceTree = "<group>"; };
 		99F78F2A214BA52900D1BD28 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -92,9 +94,18 @@
 			isa = PBXGroup;
 			children = (
 				99132573214B8A8C00384890 /* NetworkTests.swift */,
+				99D5DA0821F6D63E00E6A511 /* Resources */,
 				99132575214B8A8C00384890 /* Info.plist */,
 			);
 			path = NetworkTests;
+			sourceTree = "<group>";
+		};
+		99D5DA0821F6D63E00E6A511 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				99D5DA0621F6D63600E6A511 /* image.png */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		99F78F29214BA52900D1BD28 /* Frameworks */ = {
@@ -197,6 +208,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				99D5DA0721F6D63600E6A511 /* image.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
