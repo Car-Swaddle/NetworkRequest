@@ -36,9 +36,6 @@ class NetworkTests: XCTestCase {
             XCTAssert(false, "Should have file: image.jpeg in test bundle")
             return
         }
-        
-        let request = serviceRequest.multipartFormDataPost(withPath: "/api/profile-picture")
-        serviceRequest.uploadMultipartFormDataTask(with: request, fileURL: fileURL, contentType: <#T##String#>, completion: <#T##(Data?, HTTPURLResponse?, Error?) -> Void#>)
     }
     
 }
