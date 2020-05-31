@@ -22,7 +22,7 @@ extension Request {
     
 }
 
-
+    
 public extension Request {
     
     /// The scheme/protocol to make the network request
