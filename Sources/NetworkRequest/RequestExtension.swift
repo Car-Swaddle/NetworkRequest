@@ -10,7 +10,7 @@ import Foundation
 
 public extension NetworkRequest.Request {
     
-    public struct Endpoint {
+    struct Endpoint {
         public var rawValue: String
         public init(rawValue: String) {
             if rawValue.first != "/" {
@@ -27,7 +27,7 @@ public extension NetworkRequest.Request {
     ///   - queryItems: queryItems used to specify resource
     ///   - completion: closure called when request returns
     /// - Returns: Data task used to make request
-    public func get(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, contentType: ContentType = .applicationJSON) -> URLRequest? {
+    func get(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, contentType: ContentType = .applicationJSON) -> URLRequest? {
         return self.get(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, contentType: contentType)
     }
     
@@ -39,7 +39,7 @@ public extension NetworkRequest.Request {
     ///   - body: POST body
     ///   - completion: closure called when request returns
     /// - Returns: Task used to make network request
-    public func put(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
+    func put(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
         return self.put(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
     }
     
@@ -51,11 +51,11 @@ public extension NetworkRequest.Request {
     ///   - body: POST body
     ///   - completion: closure called when request returns
     /// - Returns: Task used to make network request
-    public func patch(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
+    func patch(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
         return self.patch(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
     }
     
-    public func delete(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
+    func delete(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
         return self.delete(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
     }
     
@@ -67,11 +67,11 @@ public extension NetworkRequest.Request {
     ///   - body: POST body
     ///   - completion: closure called when request returns
     /// - Returns: Task used to make network request
-    public func post(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
+    func post(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data, contentType: ContentType = .applicationFormURLEncoded) -> URLRequest? {
         return self.post(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme, body: body, contentType: contentType)
     }
     
-    public func multipartFormDataPost(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil) -> NSMutableURLRequest? {
+    func multipartFormDataPost(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil) -> NSMutableURLRequest? {
         return self.multipartFormDataPost(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme)
     }
     
@@ -82,7 +82,7 @@ public extension NetworkRequest.Request {
     ///   - queryItems: queryItems used to specify file specs
     ///   - completion: closure called on completion. Contains the filepath where the file was downloaded
     /// - Returns: Download task used to make request.
-    public func download(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil) -> URLRequest? {
+    func download(with endpoint: Endpoint, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil) -> URLRequest? {
         return self.download(withPath: endpoint.rawValue, queryItems: queryItems, scheme: scheme)
     }
     
@@ -91,7 +91,7 @@ public extension NetworkRequest.Request {
 
 public extension Path {
     
-    public convenience init(endpoint: Request.Endpoint, pathArguments: [String: String]) throws {
+    convenience init(endpoint: Request.Endpoint, pathArguments: [String: String]) throws {
         try self.init(originalPath: endpoint.rawValue, pathArguments: pathArguments)
     }
     

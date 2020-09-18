@@ -26,13 +26,13 @@ extension Request {
 public extension Request {
     
     /// The scheme/protocol to make the network request
-    public enum Scheme {
+    enum Scheme {
         case http
         case https
         case websocket
         case none
         
-        var value: String? {
+        public var value: String? {
             switch self {
             case .http: return "http"
             case .https: return "https"
@@ -47,7 +47,7 @@ public extension Request {
 
 public extension Request {
     
-    public struct ContentType {
+    struct ContentType {
         public var rawValue: String
         
         public static let headerKey = "Content-Type"
@@ -67,7 +67,7 @@ public extension Request {
         
     }
     
-    public static let contentLengthHeaderKey = "Content-Length"
+    static let contentLengthHeaderKey = "Content-Length"
     
 }
 
@@ -317,11 +317,11 @@ final public class MultipartFormBuilder {
 
 public extension NSMutableData {
     
-    public struct EncodingError: Error {
-        static let error = EncodingError()
+    struct EncodingError: Error {
+        public static let error = EncodingError()
     }
     
-    public func appendEncodedString(_ string: String) throws {
+    func appendEncodedString(_ string: String) throws {
         guard let data = string.data(using: .utf8, allowLossyConversion: true) else { throw EncodingError.error }
         append(data)
     }
