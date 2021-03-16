@@ -8,68 +8,9 @@
 
 import Foundation
 import UIKit
+import Combine
 
-extension Request {
-    
-    /// The method used to make network request
-    public enum Method: String {
-        case get = "GET"
-        case post = "POST"
-        case put = "PUT"
-        case patch = "PATCH"
-        case delete = "DELETE"
-    }
-    
-}
-
-    
-public extension Request {
-    
-    /// The scheme/protocol to make the network request
-    enum Scheme {
-        case http
-        case https
-        case websocket
-        case none
-        
-        public var value: String? {
-            switch self {
-            case .http: return "http"
-            case .https: return "https"
-            case .websocket: return "ws"
-            case .none: return nil
-            }
-        }
-        
-    }
-    
-}
-
-public extension Request {
-    
-    struct ContentType {
-        public var rawValue: String
-        
-        public static let headerKey = "Content-Type"
-        
-        public static let applicationFormURLEncoded = ContentType(rawValue: "application/x-www-form-urlencoded")
-        public static let applicationOctetStream = ContentType(rawValue: "application/octet-stream")
-        public static let applicationJSON = ContentType(rawValue: "application/json")
-        public static let applicationZIP = ContentType(rawValue: "application/zip")
-        public static let imageJPEG = ContentType(rawValue: "image/jpeg")
-        public static let imagePNG = ContentType(rawValue: "image/png")
-        public static let textHTML = ContentType(rawValue: "text/html;charset=utf-8")
-        public static let any = ContentType(rawValue: "*/*")
-        
-        public static func multipartFormContentType(boundary: String) -> ContentType {
-            return ContentType(rawValue: "multipart/form-data; boundary=\(boundary)")
-        }
-        
-    }
-    
-    static let contentLengthHeaderKey = "Content-Length"
-    
-}
+public typealias DataTaskPublisher<ResponseType: Decodable> = Publishers.Decode<Publishers.MapKeyPath<URLSession.DataTaskPublisher, JSONDecoder.Input>, ResponseType, JSONDecoder>
 
 /// Use this to make an HTTP request.
 final public class Request {
@@ -81,6 +22,16 @@ final public class Request {
     public private(set) var urlSession = URLSession(configuration: URLSessionConfiguration.default)
     public var defaultScheme: Scheme = .https
     public var port: Int?
+    public var cachePolicy: URLRequest.CachePolicy = .reloadIgnoringLocalCacheData
+    
+    enum RequestError: Error {
+        case noData
+    }
+    
+    public struct UnsuccessfulStatusCode: Error {
+        public let statusCode: Int
+        public let localizedDescription: String
+    }
     
     
     /// Provide a domain on which all request will be based
@@ -88,6 +39,13 @@ final public class Request {
     /// - Parameter domain: domain to base all requests.
     public init(domain: String) {
         self.domain = domain
+    }
+    
+    
+    public func dataTask<Response: Decodable>(with request: URLRequest, decoder: JSONDecoder = JSONDecoder(), completion: @escaping (_ response: Response?, _ error: Error?) -> Void) -> URLSessionDataTask? {
+        return urlSession.dataTask(with: request) { [weak self] data, urlResponse, error in
+            self?.complete(data: data, jsonDecoder: decoder, error: error, completion: completion)
+        }
     }
     
     public func dataTask(with request: URLRequest, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
@@ -120,6 +78,26 @@ final public class Request {
         }
     }
     
+    // MARK: - Publisher
+    
+    public func dataTaskPublisher<Response: Decodable>(with request: URLRequest, jsonDecoder: JSONDecoder = JSONDecoder()) -> AnyPublisher<Response, Error> {
+        let value = urlSession.dataTaskPublisher(for: request)
+            .map(\.data)
+            .decode(type: Response.self, decoder: jsonDecoder)
+            .eraseToAnyPublisher()
+        return value
+    }
+    
+    public func uploadMultipartFormPublisher(with mutableRequest: NSMutableURLRequest, fileURL: URL, contentType: String) -> URLSession.DataTaskPublisher? {
+        do {
+            try multipartFormBuilder.configure(request: mutableRequest, withFileURL: fileURL, contentType: contentType)
+        } catch { return nil }
+        
+        return urlSession.dataTaskPublisher(for: mutableRequest as URLRequest)
+    }
+
+    // MARK: - HTTP
+    
     /// Create a url session data task to make a network call.
     ///
     /// - Parameters:
@@ -129,7 +107,7 @@ final public class Request {
     /// - Returns: Data task used to make request
     public func get(withPath path: String, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, contentType: ContentType = .applicationJSON) -> URLRequest? {
         guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
+        var request = URLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
         request.httpMethod = Method.get.rawValue
         request.setValue(contentType.rawValue, forHTTPHeaderField: ContentType.headerKey)
         
@@ -145,7 +123,7 @@ final public class Request {
     /// - Returns: Data task used to make request
     public func patch(withPath path: String, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationJSON) -> URLRequest? {
         guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
+        var request = URLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
         request.httpMethod = Method.patch.rawValue
         request.setValue(contentType.rawValue, forHTTPHeaderField: ContentType.headerKey)
         request.httpBody = body
@@ -162,7 +140,7 @@ final public class Request {
     /// - Returns: Data task used to make request
     public func put(withPath path: String, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationJSON) -> URLRequest? {
         guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
+        var request = URLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
         request.httpMethod = Method.put.rawValue
         request.setValue(contentType.rawValue, forHTTPHeaderField: ContentType.headerKey)
         request.httpBody = body
@@ -181,7 +159,7 @@ final public class Request {
     /// - Returns: Task used to make network request
     public func post(withPath path: String, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationJSON) -> URLRequest? {
         guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
+        var request = URLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
         request.httpMethod = Method.post.rawValue
         request.setValue(contentType.rawValue, forHTTPHeaderField: ContentType.headerKey)
         request.httpBody = body
@@ -191,7 +169,7 @@ final public class Request {
     
     public func multipartFormDataPost(withPath path: String, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil) -> NSMutableURLRequest? {
         guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
-        let request = NSMutableURLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
+        let request = NSMutableURLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
         request.httpMethod = Method.post.rawValue
         
         return request
@@ -199,7 +177,7 @@ final public class Request {
     
     public func delete(withPath path: String, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, body: Data?, contentType: ContentType = .applicationJSON) -> URLRequest? {
         guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
+        var request = URLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
         request.httpMethod = Method.delete.rawValue
         request.setValue(contentType.rawValue, forHTTPHeaderField: ContentType.headerKey)
         request.httpBody = body
@@ -216,10 +194,79 @@ final public class Request {
     /// - Returns: Download task used to make request.
     public func download(withPath path: String, queryItems: [URLQueryItem] = [], scheme: Scheme? = nil, contentType: ContentType = .applicationJSON) -> URLRequest? {
         guard let url = self.url(with: path, queryItems: queryItems, scheme: scheme) else { return nil }
-        var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: timeout)
+        var request = URLRequest(url: url, cachePolicy: cachePolicy, timeoutInterval: timeout)
         request.httpMethod = Method.get.rawValue
         
         return request        
+    }
+    
+    public func send<Response: Decodable>(urlRequest: URLRequest, jsonDecoder: JSONDecoder = JSONDecoder(), completion: @escaping (_ response: Response?, _ error: Error?) -> Void) -> URLSessionDataTask? {
+        return send(urlRequest: urlRequest) { [weak self] data, error in
+            self?.complete(data: data, jsonDecoder: jsonDecoder, error: error, completion: completion)
+        }
+    }
+    
+    public func send(urlRequest: URLRequest, completion: @escaping (_ data: Data?, _ error: Error?) -> Void) -> URLSessionDataTask? {
+        return send(urlRequest: urlRequest) { data, response, error in
+            guard let response = response else {
+                completion(data, error)
+                return
+            }
+            if response.statusCode >= 200 && response.statusCode < 300 {
+                completion(data, error)
+            } else {
+                let statusCodeError = UnsuccessfulStatusCode(statusCode: response.statusCode, localizedDescription: "Error status code: \(response.statusCode)")
+                completion(data, error ?? statusCodeError)
+            }
+        }
+    }
+    
+    public func send(urlRequest: URLRequest, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
+        let task = self.dataTask(with: urlRequest, completion: completion)
+        task?.resume()
+        return task
+    }
+    
+    /// Sends a request to download a file from another server via network.
+    /// `resume` will be called before returning from this method
+    ///
+    /// - Parameters:
+    ///   - path: Path to the file to be downloaded
+    ///   - queryItems: queryItems used to specify file specs
+    ///   - completion: closure called on completion. Contains the filepath where the file was downloaded
+    /// - Returns: Download task used to make request.
+    public func download(urlRequest: URLRequest, completion: @escaping (_ url: URL?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDownloadTask? {
+        let task = self.downloadTask(with: urlRequest, completion: completion)
+        task?.resume()
+        return task
+    }
+    
+    public func download(urlRequest: URLRequest, completion: @escaping (_ url: URL?, _ error: Error?) -> Void) -> URLSessionDownloadTask? {
+        return download(urlRequest: urlRequest) { url, response, error in
+            guard let response = response else {
+                completion(url, error)
+                return
+            }
+            if response.statusCode >= 200 && response.statusCode < 300 {
+                completion(url, error)
+            } else {
+                let statusCodeError = UnsuccessfulStatusCode(statusCode: response.statusCode, localizedDescription: "Error status code: \(response.statusCode)")
+                completion(url, error ?? statusCodeError)
+            }
+        }
+    }
+    
+    
+    public func upload(urlRequest: URLRequest, fileURL: URL, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionUploadTask? {
+        let task = self.uploadTask(with: urlRequest, file: fileURL, completion: completion)
+        task?.resume()
+        return task
+    }
+    
+    public func uploadMultipartFormData(urlRequest: NSMutableURLRequest, fileURL: URL, contentType: String, completion: @escaping (_ data: Data?, _ response: HTTPURLResponse?, _ error: Error?) -> Void) -> URLSessionDataTask? {
+        let task = self.uploadMultipartFormDataTask(with: urlRequest, fileURL: fileURL, contentType: contentType, completion: completion)
+        task?.resume()
+        return task
     }
     
     private func url(with path: String, queryItems: [URLQueryItem], scheme: Scheme? = nil) -> URL? {
@@ -237,94 +284,54 @@ final public class Request {
 }
 
 
-final public class MultipartFormBuilder {
+extension Request: Hashable {
     
-    enum MultipartFormBuilderError: Error {
-        case unableToCreateData
-        case invalidFilePath
+    public static func == (lhs: Request, rhs: Request) -> Bool {
+        return lhs.timeout == rhs.timeout &&
+            lhs.domain == rhs.domain &&
+            lhs.urlSession == rhs.urlSession &&
+            lhs.defaultScheme == rhs.defaultScheme &&
+            lhs.port == rhs.port &&
+            lhs.cachePolicy == rhs.cachePolicy
     }
     
-    public static let defaultBoundary = "MultipartFormBuilderBoundary"
-    public static let defaultParameterName = "image"
-    
-    private let marker = "--"
-    private let endLine = "\r\n"
-    
-    public init(boundary: String = MultipartFormBuilder.defaultBoundary, parameterName: String = MultipartFormBuilder.defaultParameterName) {
-        self.boundary = boundary
-        self.parameterName = parameterName
-    }
-    
-    public func configure(request: NSMutableURLRequest, withFileURL url: URL, contentType: String) throws {
-        let data = try self.data(fromURL: url, contentType: contentType)
-        
-        let contentType = Request.ContentType.multipartFormContentType(boundary: boundary)
-        
-        request.setValue(contentType.rawValue, forHTTPHeaderField: Request.ContentType.headerKey)
-        request.setValue(String(data.count), forHTTPHeaderField: Request.contentLengthHeaderKey)
-        request.setValue("gzip, deflate", forHTTPHeaderField: "accept-encoding")
-        request.setValue("*/*", forHTTPHeaderField: "Accept")
-        
-        request.httpBody = data
-        request.httpShouldHandleCookies = false
-    }
-    
-    public let boundary: String
-    public let parameterName: String
-    
-    private var endBoundaryError: Error {
-        return MultipartFormBuilderError.unableToCreateData
-    }
-    
-    public func data(fromURL url: URL, contentType: String) throws -> Data {
-//        guard let img = UIImage(contentsOfFile: url.path),
-//            let fileData = img.jpegData(compressionQuality: 1) else { throw MultipartFormBuilderError.invalidFilePath }
-        
-        let fileData = try Data(contentsOf: url)
-        
-        let fileName = url.lastPathComponent
-        let fullData = NSMutableData()
-        
-        try fullData.appendEncodedString(startLine)
-        try fullData.appendEncodedString(contentDisposition(fileName: fileName))
-        try fullData.appendEncodedString(contentTypeLine(contentType: contentType))
-        fullData.append(fileData)
-        try fullData.appendEncodedString(endLine)
-        try fullData.appendEncodedString(endBoundary)
-        
-        return fullData as Data
-    }
-    
-    private var startLine: String {
-        return marker + boundary + endLine
-    }
-    
-    private func contentDisposition(fileName: String) -> String {
-        return "Content-Disposition: form-data; name=\"\(parameterName)\"; filename=\"\(fileName)\"\(endLine)"
-    }
-    
-    private func contentTypeLine(contentType: String) -> String {
-        return "Content-Type: \(contentType)\(endLine)\(endLine)"
-    }
-    
-    private var endBoundary: String {
-        return marker + boundary + marker + endLine
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(timeout)
+        hasher.combine(domain)
+        hasher.combine(urlSession)
+        hasher.combine(defaultScheme)
+        hasher.combine(port)
+        hasher.combine(cachePolicy)
     }
     
 }
 
 
 
-public extension NSMutableData {
+extension Request {
     
-    struct EncodingError: Error {
-        public static let error = EncodingError()
-    }
-    
-    func appendEncodedString(_ string: String) throws {
-        guard let data = string.data(using: .utf8, allowLossyConversion: true) else { throw EncodingError.error }
-        append(data)
+    private func complete<Response: Decodable>(data: Data?, jsonDecoder: JSONDecoder, error: Error?, completion: (_ response: Response?, _ error: Error?) -> ()) {
+        var response: Response?
+        var error: Error? = error
+        defer { completion(response, error) }
+        
+        guard let data = data else {
+            error = error ?? RequestError.noData
+            return
+        }
+        
+        do {
+            response = try jsonDecoder.decode(Response.self, from: data)
+        } catch let decodeError {
+            #if DEBUG
+            print("ERROR: Error decoding response: \(decodeError). Check the Decodable \(Response.self)")
+            if let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
+                print("json: \(json)")
+            }
+            #endif
+            
+            error = error ?? decodeError
+        }
     }
     
 }
-
