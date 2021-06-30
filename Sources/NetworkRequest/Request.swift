@@ -227,6 +227,12 @@ final public class Request {
         return task
     }
     
+    public func send<Response: Decodable>(with request: URLRequest, decoder: JSONDecoder = JSONDecoder(), completion: @escaping (_ response: Response?, _ error: Error?) -> Void) -> URLSessionDataTask? {
+        let task = self.dataTask(with: request, decoder: decoder, completion: completion)
+        task?.resume()
+        return task
+    }
+    
     /// Sends a request to download a file from another server via network.
     /// `resume` will be called before returning from this method
     ///
